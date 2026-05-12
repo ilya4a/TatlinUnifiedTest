@@ -1,4 +1,4 @@
-#include "FileTape.h"
+#include "tape/FileTape.h"
 #include <filesystem>
 #include <iostream>
 #include <thread>
@@ -71,12 +71,18 @@ path_(std::move(path)), config_(std::move(config)) {
 
     if (fs::exists(path_)) {
         const auto bytes = fs::file_size(path_);
+
+        if (bytes % ElementSize != 0) {
+            throw std::runtime_error("Invalid tape file size");
+        }
+
         size_ = bytes / ElementSize;
     } else {
         size_ = 0;
     }
 
     position_ = 0;
+    syncToPosition();
 }
 
 FileTape::~FileTape() {
@@ -93,6 +99,8 @@ bool FileTape::read(std::int32_t& value) {
     if (position_ >= size()) {
         return false;
     }
+
+    syncToPosition();
     file_.read(reinterpret_cast<char*>(&value), sizeof(value));
 
     if (!file_) {
@@ -107,6 +115,7 @@ void FileTape::write(std::int32_t value) {
     if (position_ > size_) {
         throw std::runtime_error("Attempt to write beyond end of tape");
     }
+    syncToPosition();
 
     file_.write(reinterpret_cast<const char*>(&value), sizeof(value));
 
@@ -128,7 +137,6 @@ bool FileTape::moveLeft() {
     }
 
     position_--;
-    syncToPosition();
 
     sleep(config_.moveDelay);
     return true;
@@ -139,18 +147,17 @@ bool FileTape::moveRight() {
         return false;
     }
     position_++;
-    syncToPosition();
     sleep(config_.moveDelay);
     return true;
 }
 
 void FileTape::rewind() {
     position_ = 0;
-    syncToPosition();
     sleep(config_.rewindDelay);
 }
 
 void FileTape::syncToPosition() {
+    file_.clear();
     auto off = static_cast<std::streamoff>(position_ * ElementSize);
 
     file_.seekg(off, std::ios::beg);

@@ -16,7 +16,7 @@ struct TapeConfig {
     std::filesystem::path tmp_path;
 
     explicit TapeConfig(std::filesystem::path const& path = "");
-};
+    };
 
 
 class FileTape final : public TapeI {
