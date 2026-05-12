@@ -1,5 +1,6 @@
 #include "FileTape.h"
 #include <filesystem>
+#include <iostream>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -78,16 +79,20 @@ path_(std::move(path)), config_(std::move(config)) {
     position_ = 0;
 }
 
-FileTape::~FileTape() = default;
-
+FileTape::~FileTape() {
+    try {
+        file_.flush();
+        file_.close();
+    } catch (...) {
+        std::cerr << "Cannot close tape file: " + path_.string() << std::endl;
+    }
+}
 
 
 bool FileTape::read(std::int32_t& value) {
     if (position_ >= size()) {
         return false;
     }
-
-    file_.seekg(static_cast<std::streamoff>(position_ * ElementSize), std::ios::beg);
     file_.read(reinterpret_cast<char*>(&value), sizeof(value));
 
     if (!file_) {
@@ -103,7 +108,6 @@ void FileTape::write(std::int32_t value) {
         throw std::runtime_error("Attempt to write beyond end of tape");
     }
 
-    file_.seekp(static_cast<std::streamoff>(position_ * ElementSize), std::ios::beg);
     file_.write(reinterpret_cast<const char*>(&value), sizeof(value));
 
     if (!file_) {
@@ -123,7 +127,9 @@ bool FileTape::moveLeft() {
         return false;
     }
 
-    --position_;
+    position_--;
+    syncToPosition();
+
     sleep(config_.moveDelay);
     return true;
 }
@@ -132,10 +138,23 @@ bool FileTape::moveRight() {
     if (position_ >= size_) {
         return false;
     }
-
-    ++position_;
+    position_++;
+    syncToPosition();
     sleep(config_.moveDelay);
     return true;
+}
+
+void FileTape::rewind() {
+    position_ = 0;
+    syncToPosition();
+    sleep(config_.rewindDelay);
+}
+
+void FileTape::syncToPosition() {
+    auto off = static_cast<std::streamoff>(position_ * ElementSize);
+
+    file_.seekg(off, std::ios::beg);
+    file_.seekp(off, std::ios::beg);
 }
 
 void FileTape::sleep(std::chrono::milliseconds delay) const {
@@ -151,4 +170,5 @@ std::size_t FileTape::position() const {
 std::size_t FileTape::size() const {
     return size_;
 }
+
 

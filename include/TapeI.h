@@ -13,6 +13,8 @@ public:
     virtual std::size_t position() const = 0;
     virtual std::size_t size() const = 0;
 
+    virtual void rewind() = 0;
+
     virtual ~TapeI() = default;
 
 };

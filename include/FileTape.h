@@ -18,6 +18,7 @@ struct TapeConfig {
     explicit TapeConfig(std::filesystem::path const& path = "");
 };
 
+
 class FileTape final : public TapeI {
 
 public:
@@ -30,6 +31,9 @@ public:
 
     bool moveLeft() override;
     bool moveRight() override;
+
+    void rewind() override;
+    void syncToPosition();
 
     std::size_t position() const override;
     std::size_t size() const override;
