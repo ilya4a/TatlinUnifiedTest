@@ -5,7 +5,7 @@
 class TapeI {
 public:
     virtual bool read(std::int32_t& value) = 0;
-    virtual void write(std::int32_t value) = 0;
+    virtual void write(std::int32_t& value) = 0;
 
     virtual bool moveLeft() = 0;
     virtual bool moveRight() = 0;

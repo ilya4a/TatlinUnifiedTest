@@ -9,6 +9,8 @@ add_executable(${PROJECT_NAME}
         src/tape/FileTape.cpp
         include/sorting/TapeSorter.h
         src/sorting/TapeSorter.cpp
+        include/utils/Queue.h
+        src/utils/Queue.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
