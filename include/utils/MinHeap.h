@@ -67,14 +67,13 @@ public:
 
     T peek() {
         if (size <= 0)
-            return -1;
-
+            throw std::runtime_error("MinHeap::peek() on empty heap");
         return array[0];
     }
 
     T extractMin() {
         if (size <= 0)
-            return -1;
+            throw std::runtime_error("MinHeap::extractMin() on empty heap");
         if (size == 1) {
             size--;
             return array[0];

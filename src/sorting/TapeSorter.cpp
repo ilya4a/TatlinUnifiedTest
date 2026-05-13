@@ -29,21 +29,21 @@ bool TapeSorter::sort() {
     std::filesystem::create_directories("./tmp");
 
     createTempTapes();
-
+    runMerge();
     std::int32_t v;
-    while (tempTapes_[0]->read(v)) {
+    // while (tempTapes_[0]->read(v)) {
+    //     std::cout << v << std::endl;
+    //     tempTapes_[0]->moveRight();
+    // }
+    //
+    // tempTapes_[0]->rewind();
+    //
+    while (output_->read(v)) {
         std::cout << v << std::endl;
-        tempTapes_[0]->moveRight();
+        output_->moveRight();
     }
-
-    tempTapes_[0]->rewind();
-
-    while (tempTapes_[5]->read(v)) {
-        std::cout << v << std::endl;
-        tempTapes_[5]->moveRight();
-    }
-
-    tempTapes_[5]->rewind();
+    output_->rewind();
+    // tempTapes_[5]->rewind();
 
     return false;
 }
@@ -193,18 +193,76 @@ MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
 }
 
 
+
 bool TapeSorter::runMerge() {
     MinHeap<std::pair<std::int32_t, size_t>> heap = fillTempHeap();
 
-    BoundedBlockingQueue<int32_t> extractedHeap(1);
+    while (true) {
+        try {
+            std::pair<std::int32_t, size_t> min_value = heap.extractMin();
+            output_->write(min_value.first);
+            output_->moveRight();
 
-    std::thread handleHeap([&heap, &extractedHeap]() {
-        // extractedHeap.push();
-            heap.extractMin();
-    });
+            std::int32_t new_value = 0;
+            if (tempTapes_[min_value.second]->read(new_value)) {
 
-    return false;
+                heap.insertNode({new_value, min_value.second});
+
+                tempTapes_[min_value.second]->moveRight();
+            }else {
+                tempTapes_[min_value.second]->rewind();
+            }
+        }catch (...) {
+            break;
+        }
+    }
+
+    output_->rewind();
+    return true;
 }
 
+
+// bool TapeSorter::runMerge() {
+//     MinHeap<std::pair<std::int32_t, size_t>> heap = fillTempHeap();
+//
+//     BoundedBlockingQueue<int32_t> extractedHeap(1);
+//     std::mutex tempTapeMutex;
+//     size_t tempTapeIndex = 0;
+//
+//     std::thread extractHeap([&heap, &extractedHeap, &tempTapeIndex, &tempTapeMutex, this]() {
+//         while (true) {
+//             try {
+//                 std::pair<std::int32_t, size_t> node = heap.extractMin();
+//                 extractedHeap.push(std::move(node.first));
+//
+//                 this->output_->write()
+//
+//                 {
+//                     std::unique_lock<std::mutex> lock(tempTapeMutex);
+//                     tempTapeIndex = node.second;
+//                 }
+//             }catch (...) {
+//                 break;
+//             }
+//         }
+//     });
+//
+//     std::thread pushHeap([&heap, &tempTapeIndex, this, &tempTapeMutex]() {
+//         while (true) {
+//             std::int32_t value;
+//             std::unique_lock<std::mutex> lock(tempTapeMutex);
+//
+//             if (this->tempTapes_[tempTapeIndex]->read(value)) {
+//                 heap.insertNode(std::pair<std::int32_t, size_t>(value, tempTapeIndex));
+//                 this->tempTapes_[tempTapeIndex]->moveRight();
+//             }else {
+//                 break;
+//             }
+//         }
+//     });
+//
+//     return false;
+// }
+//
 
 

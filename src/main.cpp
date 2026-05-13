@@ -5,7 +5,7 @@
 #include "sorting/TapeSorter.h"
 #include "tape/FileTape.h"
 
-const size_t TAPE_SIZE = 10000;
+const size_t TAPE_SIZE = 100;
 namespace fs = std::filesystem;
 
 void clearTempDirectory() {
@@ -24,7 +24,7 @@ std::int32_t randomInt32() {
         std::numeric_limits<std::int32_t>::min(),
         std::numeric_limits<std::int32_t>::max()
     );
-    return dist(gen);
+    return dist(gen)%100;
 }
 
 void fill(std::unique_ptr<FileTape>& source) {
@@ -56,6 +56,6 @@ int main() {
 
     tape_sorter.sort();
 
-    clearTempDirectory();
+    // clearTempDirectory();
     return 0;
 }
