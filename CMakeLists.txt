@@ -4,6 +4,9 @@ project(TatlinUnifiedTest)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(GTest REQUIRED)
+include(CTest)
+
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/tape/FileTape.cpp
@@ -16,5 +19,10 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/tape.conf DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/config)

@@ -60,7 +60,9 @@ namespace runGenerator {
 
         TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
 
-        tape_sorter.sort();
+        if (!tape_sorter.sort()) {
+            std::cerr << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+        }
 
         clearDirectory(tmpDirPath);
     }
@@ -77,8 +79,8 @@ namespace runGenerator {
 
         TapeConfig tape_config;
 
-        std::unique_ptr<FileTape> source = std::make_unique<FileTape>(tape_config, resDir/input_filename, false);
-        std::unique_ptr<FileTape> output = std::make_unique<FileTape>(tape_config, resDir/output_filename, false);
+        std::unique_ptr<FileTape> source = std::make_unique<FileTape>(tape_config, resDir/input_filename, true);
+        std::unique_ptr<FileTape> output = std::make_unique<FileTape>(tape_config, resDir/output_filename, true);
 
         fillRandom(source, TAPE_SIZE);
 
@@ -92,10 +94,11 @@ namespace runGenerator {
 
         TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
 
-        tape_sorter.sort();
-
-        clearDirectory(tmpDirPath);
+        // tape_sorter.sort(true);
+        if (!tape_sorter.sort()) {
+            std::cerr << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+        }
+        // clearDirectory(tmpDirPath);
     }
-
 
 }

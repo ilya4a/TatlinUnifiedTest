@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <future>
-#include <iostream>
 #include <utility>
 
 #include "utils/MinHeap.h"
@@ -22,25 +21,57 @@ TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
     create_tape(std::move(create_tape_function)),
     memoryLimitBytes_(memoryLimitBytes),
     maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / (sizeof(int32_t) * 3))),
-    tmp_dir_(std::move(tmp_dir)) {}
+    tmpDir_(std::move(tmp_dir)) {}
 
 
 bool TapeSorter::sort(bool rewind_tapes) {
-    std::filesystem::create_directories("./tmp");
+    std::filesystem::create_directories(tmpDir_);
 
-    createTempTapes();
+    if (!createTempTapes()) return false;
+
     runMerge();
     std::int32_t v;
 
-    while (output_->read(v)) {
-        std::cout << v << std::endl;
-        output_->moveRight();
-    }
-    output_->rewind();
+    // output_->rewind();
+    // while (output_->read(v)) {
+    //     std::cout << v << std::endl;
+    //     output_->moveRight();
+    // }
 
-    return false;
+    // tempTapes_[4]->rewind();
+    // while (tempTapes_[4]->read(v)) {
+    //     std::cout << v << std::endl;
+    //     tempTapes_[4]->moveRight();
+    // }
+
+    return true;
 }
 
+bool TapeSorter::sortSeq(bool rewind_tapes) {
+    std::filesystem::create_directories(tmpDir_);
+
+    if (!createTempTapesSeq()) return false;
+
+    runMerge();
+    std::int32_t v;
+
+    // while (output_->read(v)) {
+    //     std::cout << v << std::endl;
+    //     output_->moveRight();
+    // }
+    // output_->rewind();
+
+    return true;
+}
+
+
+TapeSorter::~TapeSorter() {
+    // if (std::filesystem::exists(tmpDir_) && std::filesystem::is_directory(tmpDir_)) {
+    //     for (const auto& entry : std::filesystem::directory_iterator(tmpDir_)) {
+    //         std::filesystem::remove_all(entry.path());
+    //     }
+    // }
+}
 
 bool TapeSorter::createTempTapes() {
     BoundedBlockingQueue<std::vector<int32_t>> rawBlocks(1);
@@ -60,10 +91,13 @@ bool TapeSorter::createTempTapes() {
                 if (!input_->read(val)) break;
                 chunk.push_back(val);
 
-                while (chunk.size() < maxChunkElements_ && input_->moveRight()) {
+                while (chunk.size() < maxChunkElements_) {
+                    if (! input_->moveRight()) break;
+
                     if (!input_->read(val)) break;
                     chunk.push_back(val);
                 }
+                input_->moveRight();
 
                 if (chunk.empty()) break;
                 rawBlocks.push(std::move(chunk));
@@ -74,26 +108,6 @@ bool TapeSorter::createTempTapes() {
             rawBlocks.close();
         }
     });
-
-    // ThreadPool thread_pool(3);
-    // auto sorter = [&]() {
-    //     try {
-    //         while (true) {
-    //             std::vector<int32_t> block;
-    //             if (!rawBlocks.pop(block)) break;
-    //
-    //             thread_pool.add_task([&block](){std::sort(block.begin(), block.end());});
-    //
-    //             if (errorOccurred) break;
-    //             sortedBlocks.push(std::move(block));
-    //         }
-    //         sortedBlocks.close();
-    //     } catch (...) {
-    //         errorOccurred = true;
-    //         sortedBlocks.close();
-    //     }
-    // };
-    // sorter();
 
     std::thread sorter([&]() {
         try {
@@ -119,7 +133,7 @@ bool TapeSorter::createTempTapes() {
                 if (!sortedBlocks.pop(sortedBlock)) break;
                 if (errorOccurred) break;
 
-                std::unique_ptr<TapeI> tape = create_tape(tmp_dir_);
+                std::unique_ptr<TapeI> tape = create_tape(tmpDir_);
 
                 for (size_t i = 0; i < sortedBlock.size(); i++) {
                     tape->write(sortedBlock[i]);
@@ -168,7 +182,7 @@ bool TapeSorter::createTempTapesSeq() {
 
             std::sort(chunk.begin(), chunk.end());
 
-            auto tape = create_tape(tmp_dir_);
+            auto tape = create_tape(tmpDir_);
             if (!tape) {
                 throw std::runtime_error("create_tape returned nullptr");
             }
@@ -209,7 +223,7 @@ MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
 }
 
 
-bool TapeSorter::runMerge(bool rewind_tapes) {
+void TapeSorter::runMerge(bool rewind_tapes) {
     auto heap = fillTempHeap();
 
     while (true) {
@@ -223,15 +237,13 @@ bool TapeSorter::runMerge(bool rewind_tapes) {
         if (tempTapes_[min_value.second]->read(new_value)) {
 
             heap.insertNode({new_value, min_value.second});
+            std::cout << new_value << std::endl;
 
             tempTapes_[min_value.second]->moveRight();
-        }else {
-            if (rewind_tapes) tempTapes_[min_value.second]->rewind();
         }
     }
 
     if (rewind_tapes) output_->rewind();
-    return true;
 }
 
 

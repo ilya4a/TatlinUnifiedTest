@@ -17,7 +17,7 @@ class MinHeap {
     int capacity;
 
 public:
-    MinHeap(int capacity, std::function<bool(T, T)> comp) : comp(comp)  {
+    MinHeap(int capacity, std::function<bool(T, T)> comp) : comp(std::move(comp))  {
         this->size = 0;
         this->capacity = capacity;
         this->array.resize(capacity);
