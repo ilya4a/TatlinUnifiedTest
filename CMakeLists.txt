@@ -11,6 +11,8 @@ add_executable(${PROJECT_NAME}
         src/sorting/TapeSorter.cpp
         include/utils/Queue.h
         include/utils/MinHeap.h
+        include/sorting/runGenerator.h
+        src/sorting/runGenerator.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

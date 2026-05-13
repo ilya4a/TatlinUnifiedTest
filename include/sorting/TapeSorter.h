@@ -18,7 +18,7 @@ class TapeSorter {
             double memoryUtilizationFactor = 0.7,
             std::filesystem::path tmp_dir = "./tmp");
 
-        bool sort();
+        bool sort(bool rewind_tapes = false);
 
     private:
         std::unique_ptr<TapeI> input_;
@@ -37,7 +37,7 @@ class TapeSorter {
         bool createTempTapes();
         bool createTempTapesSeq();
         MinHeap<std::pair<std::int32_t, size_t>> fillTempHeap();
-        bool runMerge();
+        bool runMerge(bool rewind_tapes = false);
     };
 
 

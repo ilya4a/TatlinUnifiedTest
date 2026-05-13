@@ -4,13 +4,12 @@
 
 #include <iostream>
 #include <vector>
-#include <climits>
 
 using namespace std;
 
 template <typename T>
 class MinHeap {
-private:
+
     vector<T> array;
     int size;
     int capacity;
@@ -21,6 +20,8 @@ public:
         this->capacity = capacity;
         this->array.resize(capacity);
     }
+
+    bool empty() const { return size == 0; }
 
     void heapify(int i) {
         int smallest = i;
@@ -110,11 +111,6 @@ public:
         heapify(index);
     }
 
-    void printHeap() const {
-        for (int i = 0; i < size; ++i)
-            cout << array[i] << " ";
-        cout << endl;
-    }
 };
 
 #endif // TATLINUNIFIEDTEST_MINHEAP_H
