@@ -1,44 +1,136 @@
 
 #include "sorting/TapeSorter.h"
 
+#include <algorithm>
 #include <future>
+#include <iostream>
 #include <utility>
+
+#include "utils/Queue.h"
 
 TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
     std::unique_ptr<TapeI> output,
     std::function<std::unique_ptr<TapeI>()> create_tape_function,
     size_t memoryLimitBytes,
-    double memoryUtilizationFactor = 0.7) :
+    double memoryUtilizationFactor) :
 
     input_(std::move(input)),
     output_(std::move(output)),
     create_tape(std::move(create_tape_function)),
     memoryLimitBytes_(memoryLimitBytes),
-    maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / sizeof(int32_t))){
+    maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / (sizeof(int32_t) * 3))){
+}
 
+
+bool TapeSorter::sort() {
+    createTempTapes();
+    std::int32_t v;
+    while (tempTapes_[0]->read(v)) {
+        std::cout << v << std::endl;
+        tempTapes_[0]->moveRight();
+    }
+
+    tempTapes_[0]->rewind();
+
+    while (tempTapes_[5]->read(v)) {
+        std::cout << v << std::endl;
+        tempTapes_[5]->moveRight();
+    }
+
+    tempTapes_[5]->rewind();
+
+    return false;
 }
 
 
 bool TapeSorter::createTempTapes() {
+    BoundedBlockingQueue<std::vector<int32_t>> rawBlocks(1);
+    BoundedBlockingQueue<std::vector<int32_t>> sortedBlocks(1);
 
-    std::int32_t value;
-    std::vector<std::int32_t> chunk(maxChunkElements_);
+    std::vector<std::unique_ptr<TapeI>> tempTapes;
 
-    int i = 0;
-    do {
-        input_->read(chunk[i]);
+    std::atomic<bool> errorOccurred{false};
 
-        if (input_->size() == i + 1) {
+    std::thread reader([&]() {
+        try {
+            while (true) {
+                std::vector<int32_t> chunk;
+                chunk.reserve(maxChunkElements_);
 
+                int32_t val;
+                if (!input_->read(val)) break;
+                chunk.push_back(val);
+
+                while (chunk.size() < maxChunkElements_ && input_->moveRight()) {
+                    if (!input_->read(val)) break;
+                    chunk.push_back(val);
+                }
+
+                if (chunk.empty()) break;
+                rawBlocks.push(std::move(chunk));
+            }
+            rawBlocks.close();
+        } catch (...) {
+            errorOccurred = true;
+            rawBlocks.close();
         }
+    });
 
-        if (i + 1 == maxChunkElements_) {
+    std::thread sorter([&]() {
+        try {
+            while (true) {
+                std::vector<int32_t> block;
+                if (!rawBlocks.pop(block)) break;
+                std::sort(block.begin(), block.end());
 
+                if (errorOccurred) break;
+                sortedBlocks.push(std::move(block));
+            }
+            sortedBlocks.close();
+        } catch (...) {
+            errorOccurred = true;
+            sortedBlocks.close();
         }
+    });
 
-        i++;
+    std::thread writer([&]() {
+        try {
+            while (true) {
+                std::vector<int32_t> sortedBlock;
+                if (!sortedBlocks.pop(sortedBlock)) break;
+                if (errorOccurred) break;
+
+                std::unique_ptr<TapeI> tape = create_tape();
+
+                for (size_t i = 0; i < sortedBlock.size(); i++) {
+                    tape->write(sortedBlock[i]);
+                    tape->moveRight();
+                }
+
+                tape->rewind();
+                tempTapes.push_back(std::move(tape));
+            }
+            sortedBlocks.close();
+        } catch (...) {
+            errorOccurred = true;
+            sortedBlocks.close();
+        }
+    });
+
+    reader.join();
+    sorter.join();
+    writer.join();
+
+    if (errorOccurred) {
+        return false;
     }
-    while (input_->moveRight());
+
+    tempTapes_ = std::move(tempTapes);
+    return true;
 }
 
+
+bool TapeSorter::runMerge() {
+    return false;
+}
 

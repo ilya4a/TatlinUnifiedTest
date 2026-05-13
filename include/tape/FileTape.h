@@ -27,7 +27,7 @@ public:
     ~FileTape() override;
 
     bool read(std::int32_t& value) override;
-    void write(std::int32_t value) override;
+    void write(std::int32_t const& value) override;
 
     bool moveLeft() override;
     bool moveRight() override;

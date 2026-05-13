@@ -26,7 +26,8 @@ class TapeSorter {
 
         std::function<std::unique_ptr<TapeI>()> create_tape;
 
-        // std::vector read_input_chunk();/
+        std::vector<std::unique_ptr<TapeI>> tempTapes_;
+
 
         bool createTempTapes();
         bool runMerge();

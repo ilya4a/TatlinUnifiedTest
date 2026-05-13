@@ -11,7 +11,7 @@ TapeConfig::TapeConfig(std::filesystem::path const& path )
 {
     std::filesystem::path configPath;
     if (path.empty()) {
-        configPath = "config/conf.txt";
+        configPath = "./config/tape.conf";
     } else {
         configPath = path;
     }
@@ -94,7 +94,6 @@ FileTape::~FileTape() {
     }
 }
 
-
 bool FileTape::read(std::int32_t& value) {
     if (position_ >= size()) {
         return false;
@@ -111,7 +110,7 @@ bool FileTape::read(std::int32_t& value) {
     return true;
 }
 
-void FileTape::write(std::int32_t value) {
+void FileTape::write(std::int32_t const & value) {
     if (position_ > size_) {
         throw std::runtime_error("Attempt to write beyond end of tape");
     }
@@ -135,9 +134,7 @@ bool FileTape::moveLeft() {
     if (position_ == 0) {
         return false;
     }
-
     position_--;
-
     sleep(config_.moveDelay);
     return true;
 }
