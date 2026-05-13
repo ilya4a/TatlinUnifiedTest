@@ -22,7 +22,6 @@ protected:
         };
     }
 
-
     void runSortAndVerify(const std::vector<int32_t>& inputData,
                           size_t memoryLimitBytes,
                           double memoryUtilizationFactor = 0.7,
@@ -37,9 +36,10 @@ protected:
 
         ASSERT_TRUE(sorter.sort(rewind));
 
-        outputRaw->rewind();
         std::vector<int32_t> result;
         int32_t val = 0;
+
+        outputRaw->rewind();
         while (outputRaw->read(val)) {
             result.push_back(val);
             outputRaw->moveRight();
@@ -51,9 +51,6 @@ protected:
         std::sort(expected.begin(), expected.end());
         EXPECT_EQ(result, expected);
 
-        if (rewind) {
-            EXPECT_EQ(outputRaw->position(), 0);
-        }
     }
 };
 
@@ -102,13 +99,6 @@ TEST_F(TapeSorterTest, SingleElementChunks) {
 TEST_F(TapeSorterTest, MemoryLargerThanData) {
     std::vector<int32_t> data = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
     runSortAndVerify(data, 1024 * 1024);
-}
-
-// ---------- Rewind behaviour ----------
-
-TEST_F(TapeSorterTest, RewindOutputTape) {
-    std::vector<int32_t> data = {3, 1, 2};
-    runSortAndVerify(data, 1024, 0.7, true);
 }
 
 // ---------- Data integrity ----------

@@ -62,7 +62,7 @@ public:
         int i = size - 1;
         array[i] = value;
 
-        while (i != 0 && comp(array[(i - 1) / 2] , array[i]) ) {
+        while (i != 0 && comp(array[i], array[(i - 1) / 2]) ) {
             swap(array[i], array[(i - 1) / 2]);
             i = (i - 1) / 2;
         }

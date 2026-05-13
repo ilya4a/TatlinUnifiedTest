@@ -32,6 +32,11 @@ bool TapeSorter::sort(bool rewind_tapes) {
     runMerge();
     std::int32_t v;
 
+    if (rewind_tapes) {
+        output_->rewind();
+        input_->rewind();
+    }
+
     // output_->rewind();
     // while (output_->read(v)) {
     //     std::cout << v << std::endl;
@@ -55,22 +60,16 @@ bool TapeSorter::sortSeq(bool rewind_tapes) {
     runMerge();
     std::int32_t v;
 
-    // while (output_->read(v)) {
-    //     std::cout << v << std::endl;
-    //     output_->moveRight();
-    // }
-    // output_->rewind();
-
     return true;
 }
 
 
 TapeSorter::~TapeSorter() {
-    // if (std::filesystem::exists(tmpDir_) && std::filesystem::is_directory(tmpDir_)) {
-    //     for (const auto& entry : std::filesystem::directory_iterator(tmpDir_)) {
-    //         std::filesystem::remove_all(entry.path());
-    //     }
-    // }
+    if (std::filesystem::exists(tmpDir_) && std::filesystem::is_directory(tmpDir_)) {
+        for (const auto& entry : std::filesystem::directory_iterator(tmpDir_)) {
+            std::filesystem::remove_all(entry.path());
+        }
+    }
 }
 
 bool TapeSorter::createTempTapes() {
@@ -92,7 +91,7 @@ bool TapeSorter::createTempTapes() {
                 chunk.push_back(val);
 
                 while (chunk.size() < maxChunkElements_) {
-                    if (! input_->moveRight()) break;
+                    if (!input_->moveRight()) break;
 
                     if (!input_->read(val)) break;
                     chunk.push_back(val);
@@ -174,10 +173,13 @@ bool TapeSorter::createTempTapesSeq() {
             if (!input_->read(val)) break;
             chunk.push_back(val);
 
-            while (chunk.size() < maxChunkElements_ && input_->moveRight()) {
+            while (chunk.size() < maxChunkElements_) {
+                if ( !input_->moveRight()) break;
                 if (!input_->read(val)) break;
                 chunk.push_back(val);
             }
+            input_->moveRight();
+
             if (chunk.empty()) break;
 
             std::sort(chunk.begin(), chunk.end());
@@ -223,7 +225,7 @@ MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
 }
 
 
-void TapeSorter::runMerge(bool rewind_tapes) {
+void TapeSorter::runMerge() {
     auto heap = fillTempHeap();
 
     while (true) {
@@ -237,13 +239,11 @@ void TapeSorter::runMerge(bool rewind_tapes) {
         if (tempTapes_[min_value.second]->read(new_value)) {
 
             heap.insertNode({new_value, min_value.second});
-            std::cout << new_value << std::endl;
 
             tempTapes_[min_value.second]->moveRight();
         }
     }
 
-    if (rewind_tapes) output_->rewind();
 }
 
 
