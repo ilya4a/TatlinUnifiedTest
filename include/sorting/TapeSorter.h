@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "tape/TapeI.h"
+#include "utils/MinHeap.h"
 
 class TapeSorter {
 
@@ -35,6 +36,7 @@ class TapeSorter {
 
         bool createTempTapes();
         bool createTempTapesSeq();
+        MinHeap<std::pair<std::int32_t, size_t>> fillTempHeap();
         bool runMerge();
     };
 

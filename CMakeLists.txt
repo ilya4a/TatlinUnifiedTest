@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
         include/sorting/TapeSorter.h
         src/sorting/TapeSorter.cpp
         include/utils/Queue.h
+        include/utils/MinHeap.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

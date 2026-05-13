@@ -7,6 +7,7 @@
 #include <iostream>
 #include <utility>
 
+#include "utils/MinHeap.h"
 #include "utils/Queue.h"
 
 TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
@@ -175,7 +176,35 @@ bool TapeSorter::createTempTapesSeq() {
     }
 }
 
+
+MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
+    MinHeap<std::pair<std::int32_t, size_t>> heap(tempTapes_.size());
+
+    std::int32_t value;
+    size_t index = 0;
+    for (auto &i: tempTapes_) {
+        if (i->read(value)) {
+            heap.insertNode(std::pair(value, index));
+            i->moveRight();
+        }
+        index++;
+    }
+    return heap;
+}
+
+
 bool TapeSorter::runMerge() {
+    MinHeap<std::pair<std::int32_t, size_t>> heap = fillTempHeap();
+
+    BoundedBlockingQueue<int32_t> extractedHeap(1);
+
+    std::thread handleHeap([&heap, &extractedHeap]() {
+        // extractedHeap.push();
+            heap.extractMin();
+    });
+
     return false;
 }
+
+
 
