@@ -30,6 +30,7 @@ class TapeSorter {
 
 
         bool createTempTapes();
+        bool createTempTapesSeq();
         bool runMerge();
     };
 

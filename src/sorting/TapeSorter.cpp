@@ -129,6 +129,46 @@ bool TapeSorter::createTempTapes() {
     return true;
 }
 
+bool TapeSorter::createTempTapesSeq() {
+    try {
+        std::vector<std::unique_ptr<TapeI>> tempTapes;
+
+        while (true) {
+            std::vector<int32_t> chunk;
+            chunk.reserve(maxChunkElements_);
+
+            int32_t val;
+            if (!input_->read(val)) break;
+            chunk.push_back(val);
+
+            while (chunk.size() < maxChunkElements_ && input_->moveRight()) {
+                if (!input_->read(val)) break;
+                chunk.push_back(val);
+            }
+            if (chunk.empty()) break;
+
+            std::sort(chunk.begin(), chunk.end());
+
+            auto tape = create_tape();
+            if (!tape) {
+                throw std::runtime_error("create_tape returned nullptr");
+            }
+
+            for (size_t i = 0; i < chunk.size(); ++i) {
+                tape->write(chunk[i]);
+                if (i + 1 < chunk.size()) {
+                    tape->moveRight();
+                }
+            }
+            tape->rewind();
+            tempTapes.push_back(std::move(tape));
+        }
+        tempTapes_ = std::move(tempTapes);
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
 
 bool TapeSorter::runMerge() {
     return false;
