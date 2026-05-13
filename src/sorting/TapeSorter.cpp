@@ -189,9 +189,12 @@ bool TapeSorter::createTempTapesSeq() {
     }
 }
 
-
 MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
-    MinHeap<std::pair<std::int32_t, size_t>> heap(tempTapes_.size());
+
+    MinHeap<std::pair<std::int32_t, size_t>> heap(tempTapes_.size(),[](const std::pair<int32_t, size_t>& a,
+        const std::pair<int32_t, size_t>& b) {
+    return a.first < b.first;
+    });
 
     std::int32_t value;
     size_t index = 0;
@@ -207,7 +210,7 @@ MinHeap<std::pair<std::int32_t, size_t>> TapeSorter::fillTempHeap() {
 
 
 bool TapeSorter::runMerge(bool rewind_tapes) {
-    MinHeap<std::pair<std::int32_t, size_t>> heap = fillTempHeap();
+    auto heap = fillTempHeap();
 
     while (true) {
         if (heap.empty()) break;

@@ -11,11 +11,13 @@ template <typename T>
 class MinHeap {
 
     vector<T> array;
+    std::function<bool(T, T)> comp;
+
     int size;
     int capacity;
 
 public:
-    MinHeap(int capacity) {
+    MinHeap(int capacity, std::function<bool(T, T)> comp) : comp(comp)  {
         this->size = 0;
         this->capacity = capacity;
         this->array.resize(capacity);
@@ -28,10 +30,10 @@ public:
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && array[left] < array[smallest])
+        if (left < size && comp(array[left],array[smallest]))
             smallest = left;
 
-        if (right < size && array[right] < array[smallest])
+        if (right < size && comp(array[right], array[smallest]))
             smallest = right;
 
         if (smallest != i) {
@@ -60,7 +62,7 @@ public:
         int i = size - 1;
         array[i] = value;
 
-        while (i != 0 && array[(i - 1) / 2] > array[i]) {
+        while (i != 0 && comp(array[(i - 1) / 2] , array[i]) ) {
             swap(array[i], array[(i - 1) / 2]);
             i = (i - 1) / 2;
         }
