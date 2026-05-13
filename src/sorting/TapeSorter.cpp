@@ -2,6 +2,7 @@
 #include "sorting/TapeSorter.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <future>
 #include <iostream>
 #include <utility>
@@ -10,20 +11,24 @@
 
 TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
     std::unique_ptr<TapeI> output,
-    std::function<std::unique_ptr<TapeI>()> create_tape_function,
+    std::function<std::unique_ptr<TapeI>(std::filesystem::path path)> create_tape_function,
     size_t memoryLimitBytes,
-    double memoryUtilizationFactor) :
+    double memoryUtilizationFactor,
+    std::filesystem::path tmp_dir) :
 
     input_(std::move(input)),
     output_(std::move(output)),
     create_tape(std::move(create_tape_function)),
     memoryLimitBytes_(memoryLimitBytes),
-    maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / (sizeof(int32_t) * 3))){
-}
+    maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / (sizeof(int32_t) * 3))),
+    tmp_dir_(std::move(tmp_dir)) {}
 
 
 bool TapeSorter::sort() {
+    std::filesystem::create_directories("./tmp");
+
     createTempTapes();
+
     std::int32_t v;
     while (tempTapes_[0]->read(v)) {
         std::cout << v << std::endl;
@@ -100,7 +105,7 @@ bool TapeSorter::createTempTapes() {
                 if (!sortedBlocks.pop(sortedBlock)) break;
                 if (errorOccurred) break;
 
-                std::unique_ptr<TapeI> tape = create_tape();
+                std::unique_ptr<TapeI> tape = create_tape(tmp_dir_);
 
                 for (size_t i = 0; i < sortedBlock.size(); i++) {
                     tape->write(sortedBlock[i]);
@@ -149,7 +154,7 @@ bool TapeSorter::createTempTapesSeq() {
 
             std::sort(chunk.begin(), chunk.end());
 
-            auto tape = create_tape();
+            auto tape = create_tape(tmp_dir_);
             if (!tape) {
                 throw std::runtime_error("create_tape returned nullptr");
             }

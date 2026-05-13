@@ -46,8 +46,8 @@ int main() {
     fill(source);
     std::atomic<size_t> t{0};
 
-    auto create_func = [&tape_config, &t]() {
-        std::string name = "./tmp/temp_tape" + std::to_string(t);
+    auto create_func = [&tape_config, &t](std::filesystem::path path) {
+        std::filesystem::path name = path / std::string( "temp_tape" + std::to_string(t));
         t++;
         return std::make_unique<FileTape>(tape_config, name, true);
     };
