@@ -8,10 +8,9 @@
 
 namespace fs = std::filesystem;
 
-
-FileTape::FileTape(FileTapeConfig config, std::filesystem::path  path, bool truncate):
-path_(std::move(path)), config_(std::move(config)) {
-
+FileTape::FileTape(FileTapeConfig config, std::filesystem::path path, bool truncate)
+    : path_(std::move(path)),
+      config_(std::move(config)) {
     if (truncate) {
         std::ofstream create(path_, std::ios::binary | std::ios::trunc);
         if (!create) {
@@ -59,13 +58,13 @@ FileTape::~FileTape() {
     }
 }
 
-bool FileTape::read(std::int32_t& value) {
+bool FileTape::read(std::int32_t &value) {
     if (position_ >= size()) {
         return false;
     }
 
     syncToPosition();
-    file_.read(reinterpret_cast<char*>(&value), sizeof(value));
+    file_.read(reinterpret_cast<char *>(&value), sizeof(value));
 
     if (!file_) {
         return false;
@@ -75,13 +74,13 @@ bool FileTape::read(std::int32_t& value) {
     return true;
 }
 
-void FileTape::write(std::int32_t const & value) {
+void FileTape::write(const std::int32_t &value) {
     if (position_ > size_) {
         throw std::runtime_error("Attempt to write beyond end of tape");
     }
     syncToPosition();
 
-    file_.write(reinterpret_cast<const char*>(&value), sizeof(value));
+    file_.write(reinterpret_cast<const char *>(&value), sizeof(value));
 
     if (!file_) {
         throw std::runtime_error("Failed to write to tape file: " + path_.string());
@@ -139,5 +138,4 @@ std::size_t FileTape::position() const {
 std::size_t FileTape::size() const {
     return size_;
 }
-
 

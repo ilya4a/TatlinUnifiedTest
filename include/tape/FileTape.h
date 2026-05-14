@@ -3,20 +3,19 @@
 
 #include "TapeI.h"
 
+#include "FileTapeConfig.h"
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include "FileTapeConfig.h"
 
 class FileTape final : public TapeI {
-
-public:
+  public:
     FileTape(FileTapeConfig config, std::filesystem::path path, bool truncate);
 
     ~FileTape() override;
 
-    bool read(std::int32_t& value) override;
-    void write(std::int32_t const& value) override;
+    bool read(std::int32_t &value) override;
+    void write(const std::int32_t &value) override;
 
     bool moveLeft() override;
     bool moveRight() override;
@@ -27,7 +26,7 @@ public:
     std::size_t position() const override;
     std::size_t size() const override;
 
-private:
+  private:
     void sleep(std::chrono::nanoseconds delay) const;
 
     static constexpr std::size_t ElementSize = sizeof(std::int32_t);
@@ -36,9 +35,8 @@ private:
     FileTapeConfig config_;
     std::fstream file_;
 
-    std::size_t position_{0};
-    std::size_t size_{0};
+    std::size_t position_ { 0 };
+    std::size_t size_ { 0 };
 };
-
 
 #endif // TATLINUNIFIEDTEST_FILETAPE_H

@@ -12,24 +12,23 @@
 #include "sorting/TapeSorter.h"
 
 class TapeSorterTest : public ::testing::Test {
-protected:
-
+  protected:
     std::function<std::unique_ptr<TapeI>()> factory_;
 
     void SetUp() override {
-        factory_ = []() {
-            return std::make_unique<MockTape>();
-        };
+        factory_ = []() { return std::make_unique<MockTape>(); };
     }
 
-    void runSortAndVerify(const std::vector<int32_t>& inputData,
-                          size_t memoryLimitBytes,
-                          double memoryUtilizationFactor = 0.7,
-                          bool rewind = false) {
-        auto input  = std::make_unique<MockTape>(inputData);
+    void runSortAndVerify(
+        const std::vector<int32_t> &inputData,
+        size_t memoryLimitBytes,
+        double memoryUtilizationFactor = 0.7,
+        bool rewind = false
+    ) {
+        auto input = std::make_unique<MockTape>(inputData);
         auto output = std::make_unique<MockTape>();
 
-        auto* outputRaw = output.get();
+        auto *outputRaw = output.get();
 
         SorterConfig sorterConfig;
         sorterConfig.tapeFactory = factory_;
@@ -53,10 +52,8 @@ protected:
         std::vector<int32_t> expected = inputData;
         std::sort(expected.begin(), expected.end());
         EXPECT_EQ(result, expected);
-
     }
 };
-
 
 // ---------- Basic scenarios ----------
 
@@ -65,7 +62,7 @@ TEST_F(TapeSorterTest, EmptyInput) {
 }
 
 TEST_F(TapeSorterTest, SingleElement) {
-    runSortAndVerify({42}, 1024);
+    runSortAndVerify({ 42 }, 1024);
 }
 
 TEST_F(TapeSorterTest, AlreadySorted) {
@@ -81,7 +78,7 @@ TEST_F(TapeSorterTest, Reversed) {
 }
 
 TEST_F(TapeSorterTest, RandomSmall) {
-    std::vector<int32_t> data = {5, 2, 8, 1, 9, 3, 7, 4, 6};
+    std::vector<int32_t> data = { 5, 2, 8, 1, 9, 3, 7, 4, 6 };
     runSortAndVerify(data, 1024);
 }
 
@@ -90,17 +87,17 @@ TEST_F(TapeSorterTest, RandomSmall) {
 TEST_F(TapeSorterTest, MultipleChunks) {
     std::vector<int32_t> data(1000);
     std::iota(data.begin(), data.end(), 0);
-    std::shuffle(data.begin(), data.end(), std::mt19937{42});
+    std::shuffle(data.begin(), data.end(), std::mt19937 { 42 });
     runSortAndVerify(data, 600);
 }
 
 TEST_F(TapeSorterTest, SingleElementChunks) {
-    std::vector<int32_t> data = {5, 3, 8, 1, 9, 2};
+    std::vector<int32_t> data = { 5, 3, 8, 1, 9, 2 };
     runSortAndVerify(data, sizeof(int32_t), 1.0);
 }
 
 TEST_F(TapeSorterTest, MemoryLargerThanData) {
-    std::vector<int32_t> data = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    std::vector<int32_t> data = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
     runSortAndVerify(data, 1024 * 1024);
 }
 
@@ -109,6 +106,6 @@ TEST_F(TapeSorterTest, MemoryLargerThanData) {
 TEST_F(TapeSorterTest, PreservesElements) {
     std::vector<int32_t> data(5000);
     std::iota(data.begin(), data.end(), 0);
-    std::shuffle(data.begin(), data.end(), std::mt19937{12345});
+    std::shuffle(data.begin(), data.end(), std::mt19937 { 12345 });
     runSortAndVerify(data, 2000);
 }

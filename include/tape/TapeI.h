@@ -3,9 +3,9 @@
 #include <cstdint>
 
 class TapeI {
-public:
-    virtual bool read(std::int32_t& value) = 0;
-    virtual void write(std::int32_t const& value) = 0;
+  public:
+    virtual bool read(std::int32_t &value) = 0;
+    virtual void write(const std::int32_t &value) = 0;
 
     virtual bool moveLeft() = 0;
     virtual bool moveRight() = 0;
@@ -16,7 +16,6 @@ public:
     virtual void rewind() = 0;
 
     virtual ~TapeI() = default;
-
 };
 
 #endif // TATLINUNIFIEDTEST_TAPEI_H

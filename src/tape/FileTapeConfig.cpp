@@ -5,8 +5,7 @@
 
 namespace fs = std::filesystem;
 
-FileTapeConfig::FileTapeConfig(std::filesystem::path const& path){
-
+FileTapeConfig::FileTapeConfig(const std::filesystem::path &path) {
     std::filesystem::path configPath;
     if (path.empty()) {
         configPath = "./config/tape.conf";
@@ -21,11 +20,15 @@ FileTapeConfig::FileTapeConfig(std::filesystem::path const& path){
 
     std::string line;
     while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
 
         std::istringstream iss(line);
         std::string key, value;
-        if (!(iss >> key >> value)) continue;
+        if (!(iss >> key >> value)) {
+            continue;
+        }
 
         if (key == "read_delay_ns") {
             readDelay = std::chrono::nanoseconds(std::stoll(value));

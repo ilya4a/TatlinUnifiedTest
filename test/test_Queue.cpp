@@ -1,14 +1,12 @@
-
 #include "utils/Queue.h"
 
-#include <gtest/gtest.h>
 #include <atomic>
 #include <chrono>
+#include <gtest/gtest.h>
 #include <memory>
 #include <stdexcept>
 #include <thread>
 #include <vector>
-
 
 // ---------- Basic operations ----------
 TEST(BoundedBlockingQueueTest, PushPopSingle) {
@@ -38,7 +36,7 @@ TEST(BoundedBlockingQueueTest, PushBlocksWhenFull) {
     BoundedBlockingQueue<int> q(1);
     q.push(100);
 
-    std::atomic<bool> push_done{false};
+    std::atomic<bool> push_done { false };
     std::thread pusher([&]() {
         q.push(200);
         push_done = true;
@@ -60,7 +58,7 @@ TEST(BoundedBlockingQueueTest, PushBlocksWhenFull) {
 
 TEST(BoundedBlockingQueueTest, PopBlocksWhenEmpty) {
     BoundedBlockingQueue<int> q(1);
-    std::atomic<bool> pop_done{false};
+    std::atomic<bool> pop_done { false };
     int popped = 0;
 
     std::thread popper([&]() {
@@ -83,11 +81,11 @@ TEST(BoundedBlockingQueueTest, PopBlocksWhenEmpty) {
 // ---------- Closing ----------
 TEST(BoundedBlockingQueueTest, CloseUnblocksPushWithException) {
     BoundedBlockingQueue<int> q(0);
-    std::atomic<bool> push_throw{false};
+    std::atomic<bool> push_throw { false };
     std::thread pusher([&]() {
         try {
             q.push(5);
-        } catch (const std::runtime_error&) {
+        } catch (const std::runtime_error &) {
             push_throw = true;
         }
     });
@@ -102,7 +100,7 @@ TEST(BoundedBlockingQueueTest, CloseUnblocksPushWithException) {
 
 TEST(BoundedBlockingQueueTest, CloseUnblocksPop) {
     BoundedBlockingQueue<int> q(1);
-    std::atomic<bool> pop_returned{false};
+    std::atomic<bool> pop_returned { false };
     std::thread popper([&]() {
         int v;
         bool ok = q.pop(v);
@@ -140,9 +138,9 @@ TEST(BoundedBlockingQueueTest, MultipleProducersConsumers) {
     constexpr size_t kCap = 16;
 
     BoundedBlockingQueue<int> q(kCap);
-    std::atomic<int> sum_produced{0};
-    std::atomic<int> sum_consumed{0};
-    std::atomic<int> items_consumed{0};
+    std::atomic<int> sum_produced { 0 };
+    std::atomic<int> sum_consumed { 0 };
+    std::atomic<int> items_consumed { 0 };
 
     auto producer = [&](int start) {
         for (int i = 0; i < kItemsPer; ++i) {
@@ -154,7 +152,9 @@ TEST(BoundedBlockingQueueTest, MultipleProducersConsumers) {
     auto consumer = [&]() {
         while (true) {
             int v;
-            if (!q.pop(v)) break;
+            if (!q.pop(v)) {
+                break;
+            }
             sum_consumed += v;
             ++items_consumed;
         }
@@ -162,14 +162,20 @@ TEST(BoundedBlockingQueueTest, MultipleProducersConsumers) {
 
     std::vector<std::thread> producers;
     std::vector<std::thread> consumers;
-    for (int i = 0; i < kProducers; ++i)
+    for (int i = 0; i < kProducers; ++i) {
         producers.emplace_back(producer, i * kItemsPer);
-    for (int i = 0; i < kConsumers; ++i)
+    }
+    for (int i = 0; i < kConsumers; ++i) {
         consumers.emplace_back(consumer);
+    }
 
-    for (auto& t : producers) t.join();
+    for (auto &t : producers) {
+        t.join();
+    }
     q.close();
-    for (auto& t : consumers) t.join();
+    for (auto &t : consumers) {
+        t.join();
+    }
 
     EXPECT_EQ(items_consumed, kProducers * kItemsPer);
     EXPECT_EQ(sum_produced, sum_consumed);

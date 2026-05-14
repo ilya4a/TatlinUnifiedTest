@@ -2,22 +2,22 @@
 #define TATLINUNIFIEDTEST_MOCKTAPE_H
 
 #include "tape/TapeI.h"
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 class MockTape : public TapeI {
-public:
+  public:
+    explicit MockTape(const std::vector<std::int32_t> &data = {}) : data_(data), pos_(0) { }
 
-    explicit MockTape(const std::vector<std::int32_t>& data = {})
-        : data_(data), pos_(0) {}
-
-    bool read(std::int32_t& value) override {
-        if (pos_ >= data_.size()) return false;
+    bool read(std::int32_t &value) override {
+        if (pos_ >= data_.size()) {
+            return false;
+        }
         value = data_[pos_];
         return true;
     }
 
-    void write(std::int32_t const& value) override {
+    void write(const std::int32_t &value) override {
         if (pos_ > data_.size()) {
             throw std::runtime_error("Attempt to write beyond end of tape");
         }
@@ -28,30 +28,28 @@ public:
     }
 
     bool moveLeft() override {
-        if (pos_ == 0) return false;
+        if (pos_ == 0) {
+            return false;
+        }
         --pos_;
         return true;
     }
 
     bool moveRight() override {
-        if (pos_ >= data_.size()) return false;
+        if (pos_ >= data_.size()) {
+            return false;
+        }
         ++pos_;
         return true;
     }
 
-    size_t position() const override {
-        return pos_;
-    }
+    size_t position() const override { return pos_; }
 
-    size_t size() const override {
-        return data_.size();
-    }
+    size_t size() const override { return data_.size(); }
 
-    void rewind() override {
-        pos_ = 0;
-    }
+    void rewind() override { pos_ = 0; }
 
-private:
+  private:
     std::vector<std::int32_t> data_;
     std::size_t pos_;
 };

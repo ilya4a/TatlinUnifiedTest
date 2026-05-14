@@ -1,4 +1,3 @@
-
 #ifndef TATLINUNIFIEDTEST_MINHEAP_H
 #define TATLINUNIFIEDTEST_MINHEAP_H
 
@@ -7,17 +6,15 @@
 
 using namespace std;
 
-template <typename T>
-class MinHeap {
-
+template<typename T> class MinHeap {
     vector<T> array;
     std::function<bool(T, T)> comp;
 
     int size;
     int capacity;
 
-public:
-    MinHeap(int capacity, std::function<bool(T, T)> comp) : comp(std::move(comp))  {
+  public:
+    MinHeap(int capacity, std::function<bool(T, T)> comp) : comp(std::move(comp)) {
         this->size = 0;
         this->capacity = capacity;
         this->array.resize(capacity);
@@ -30,11 +27,13 @@ public:
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && comp(array[left],array[smallest]))
+        if (left < size && comp(array[left], array[smallest])) {
             smallest = left;
+        }
 
-        if (right < size && comp(array[right], array[smallest]))
+        if (right < size && comp(array[right], array[smallest])) {
             smallest = right;
+        }
 
         if (smallest != i) {
             swap(array[i], array[smallest]);
@@ -42,7 +41,7 @@ public:
         }
     }
 
-    void buildHeap(const vector<T>& arr) {
+    void buildHeap(const vector<T> &arr) {
         capacity = arr.size();
         size = capacity;
         array = arr;
@@ -62,21 +61,23 @@ public:
         int i = size - 1;
         array[i] = value;
 
-        while (i != 0 && comp(array[i], array[(i - 1) / 2]) ) {
+        while (i != 0 && comp(array[i], array[(i - 1) / 2])) {
             swap(array[i], array[(i - 1) / 2]);
             i = (i - 1) / 2;
         }
     }
 
     T peek() {
-        if (size <= 0)
+        if (size <= 0) {
             throw std::runtime_error("MinHeap::peek() on empty heap");
+        }
         return array[0];
     }
 
     T extractMin() {
-        if (size <= 0)
+        if (size <= 0) {
             throw std::runtime_error("MinHeap::extractMin() on empty heap");
+        }
         if (size == 1) {
             size--;
             return array[0];
@@ -112,7 +113,6 @@ public:
 
         heapify(index);
     }
-
 };
 
 #endif // TATLINUNIFIEDTEST_MINHEAP_H

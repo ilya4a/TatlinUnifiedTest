@@ -10,7 +10,7 @@
 // ---------- Fixture for int min-heap ----------
 
 class MinHeapTest : public ::testing::Test {
-protected:
+  protected:
     std::function<bool(int, int)> comp_;
 
     void SetUp() override {
@@ -40,7 +40,7 @@ TEST_F(MinHeapTest, SingleElement) {
 
 TEST_F(MinHeapTest, InsertMultipleAndExtractAll) {
     MinHeap<int> heap(10, comp_);
-    std::vector<int> input = {5, 2, 8, 1, 9, 3};
+    std::vector<int> input = { 5, 2, 8, 1, 9, 3 };
     for (int v : input) {
         heap.insertNode(v);
     }
@@ -58,7 +58,7 @@ TEST_F(MinHeapTest, InsertMultipleAndExtractAll) {
 
 TEST_F(MinHeapTest, DuplicateValues) {
     MinHeap<int> heap(10, comp_);
-    std::vector<int> values = {5, 1, 5, 1, 3};
+    std::vector<int> values = { 5, 1, 5, 1, 3 };
     for (int v : values) {
         heap.insertNode(v);
     }
@@ -66,7 +66,7 @@ TEST_F(MinHeapTest, DuplicateValues) {
     while (!heap.empty()) {
         extracted.push_back(heap.extractMin());
     }
-    std::vector<int> expected = {1, 1, 3, 5, 5};
+    std::vector<int> expected = { 1, 1, 3, 5, 5 };
     EXPECT_EQ(extracted, expected);
 }
 
@@ -103,7 +103,7 @@ TEST_F(MinHeapTest, PeekDoesNotRemoveElement) {
 
 TEST_F(MinHeapTest, BuildHeapFromVector) {
     MinHeap<int> heap(0, comp_);
-    std::vector<int> input = {9, 3, 6, 1, 4, 8, 2, 7, 5};
+    std::vector<int> input = { 9, 3, 6, 1, 4, 8, 2, 7, 5 };
     heap.buildHeap(input);
     EXPECT_FALSE(heap.empty());
 
@@ -121,8 +121,10 @@ TEST_F(MinHeapTest, BuildHeapFromVector) {
 
 TEST_F(MinHeapTest, DeleteExistingNode) {
     MinHeap<int> heap(10, comp_);
-    std::vector<int> data = {10, 20, 30, 40, 50};
-    for (int v : data) heap.insertNode(v);
+    std::vector<int> data = { 10, 20, 30, 40, 50 };
+    for (int v : data) {
+        heap.insertNode(v);
+    }
     EXPECT_FALSE(heap.empty());
 
     heap.DeleteNode(30);
@@ -130,7 +132,7 @@ TEST_F(MinHeapTest, DeleteExistingNode) {
     while (!heap.empty()) {
         remaining.push_back(heap.extractMin());
     }
-    std::vector<int> expected = {10, 20, 40, 50};
+    std::vector<int> expected = { 10, 20, 40, 50 };
     EXPECT_EQ(remaining, expected);
 }
 
@@ -146,7 +148,7 @@ TEST_F(MinHeapTest, DeleteNonExistentNode) {
     while (!heap.empty()) {
         extracted.push_back(heap.extractMin());
     }
-    std::vector<int> expected = {1, 2};
+    std::vector<int> expected = { 1, 2 };
     EXPECT_EQ(extracted, expected);
 }
 
@@ -161,7 +163,7 @@ TEST_F(MinHeapTest, DeleteRoot) {
     while (!heap.empty()) {
         extracted.push_back(heap.extractMin());
     }
-    std::vector<int> expected = {10, 15};
+    std::vector<int> expected = { 10, 15 };
     EXPECT_EQ(extracted, expected);
 }
 
@@ -185,14 +187,13 @@ TEST(MinHeapCustomComp, MaxHeapBehaviour) {
 // ---------- Pair type (like TapeSorter usage) ----------
 
 TEST(MinHeapPairTest, PairMinByFirstElement) {
-    auto comp = [](const std::pair<int32_t, size_t>& a,
-                   const std::pair<int32_t, size_t>& b) {
+    auto comp = [](const std::pair<int32_t, size_t> &a, const std::pair<int32_t, size_t> &b) {
         return a.first < b.first;
     };
     MinHeap<std::pair<int32_t, size_t>> heap(10, comp);
-    heap.insertNode({3, 0});
-    heap.insertNode({1, 1});
-    heap.insertNode({2, 2});
+    heap.insertNode({ 3, 0 });
+    heap.insertNode({ 1, 1 });
+    heap.insertNode({ 2, 2 });
     auto min = heap.extractMin();
     EXPECT_EQ(min.first, 1);
     EXPECT_EQ(min.second, 1);

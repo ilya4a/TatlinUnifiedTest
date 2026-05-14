@@ -1,13 +1,12 @@
 #ifndef TATLINUNIFIEDTEST_QUEUE_H
 #define TATLINUNIFIEDTEST_QUEUE_H
 
+#include <condition_variable>
 #include <deque>
 #include <mutex>
-#include <condition_variable>
 #include <stdexcept>
 
-template<typename T>
-class BoundedBlockingQueue {
+template<typename T> class BoundedBlockingQueue {
     std::deque<T> content;
 
     size_t capacity;
@@ -23,22 +22,21 @@ class BoundedBlockingQueue {
     BoundedBlockingQueue &operator=(const BoundedBlockingQueue &) = delete;
     BoundedBlockingQueue &operator=(BoundedBlockingQueue &&) = delete;
 
-public:
-    explicit BoundedBlockingQueue(size_t capacity) : capacity(capacity) {}
+  public:
+    explicit BoundedBlockingQueue(size_t capacity) : capacity(capacity) { }
 
     void close();
 
-    void push(T&& item);
+    void push(T &&item);
 
-    bool try_push(T&& item);
+    bool try_push(T &&item);
 
-    bool pop(T& item);
+    bool pop(T &item);
 
-    bool try_pop(T& item);
+    bool try_pop(T &item);
 };
 
-template<typename T>
-void BoundedBlockingQueue<T>::close()  {
+template<typename T> void BoundedBlockingQueue<T>::close() {
     {
         std::lock_guard<std::mutex> lk(mutex);
         closed = true;
@@ -47,12 +45,9 @@ void BoundedBlockingQueue<T>::close()  {
     not_full.notify_all();
 }
 
-template<typename T>
-void BoundedBlockingQueue<T>::push(T &&item) {
+template<typename T> void BoundedBlockingQueue<T>::push(T &&item) {
     std::unique_lock<std::mutex> lk(mutex);
-    not_full.wait(lk, [this]() {
-        return content.size() < capacity || closed;
-    });
+    not_full.wait(lk, [this]() { return content.size() < capacity || closed; });
     if (closed) {
         throw std::runtime_error("push into closed queue");
     }
@@ -61,8 +56,7 @@ void BoundedBlockingQueue<T>::push(T &&item) {
     not_empty.notify_one();
 }
 
-template<typename T>
-bool BoundedBlockingQueue<T>::try_push(T &&item)  {
+template<typename T> bool BoundedBlockingQueue<T>::try_push(T &&item) {
     std::scoped_lock<std::mutex> lk(mutex);
     if (content.size() == capacity || closed) {
         return false;
@@ -72,12 +66,9 @@ bool BoundedBlockingQueue<T>::try_push(T &&item)  {
     return true;
 }
 
-template<typename T>
-bool BoundedBlockingQueue<T>::pop(T &item){
+template<typename T> bool BoundedBlockingQueue<T>::pop(T &item) {
     std::unique_lock<std::mutex> lk(mutex);
-    not_empty.wait(lk, [this]() {
-        return !content.empty() || closed;
-    });
+    not_empty.wait(lk, [this]() { return !content.empty() || closed; });
     if (content.empty()) {
         return false;
     }
@@ -88,8 +79,7 @@ bool BoundedBlockingQueue<T>::pop(T &item){
     return true;
 }
 
-template<typename T>
-bool BoundedBlockingQueue<T>::try_pop(T &item)  {
+template<typename T> bool BoundedBlockingQueue<T>::try_pop(T &item) {
     std::lock_guard<std::mutex> lk(mutex);
     if (content.empty()) {
         return false;
@@ -99,7 +89,5 @@ bool BoundedBlockingQueue<T>::try_pop(T &item)  {
     not_full.notify_one();
     return true;
 }
-
-
 
 #endif // TATLINUNIFIEDTEST_QUEUE_H
