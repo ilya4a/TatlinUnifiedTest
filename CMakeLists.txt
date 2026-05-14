@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME}
         src/sorting/runGenerator.cpp
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include extern/CLI11/include)
 
 option(BUILD_TESTS "Build unit tests" ON)
 if(BUILD_TESTS)

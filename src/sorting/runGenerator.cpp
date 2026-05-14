@@ -60,11 +60,8 @@ namespace runGenerator {
 
         TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
 
-        if (!tape_sorter.sort()) {
-            std::cerr << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
-        }
+        tape_sorter.sort();
 
-        clearDirectory(tmpDirPath);
     }
 
     void run_simple() {
@@ -94,11 +91,10 @@ namespace runGenerator {
 
         TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
 
-        // tape_sorter.sort(true);
         if (!tape_sorter.sort()) {
-            std::cerr << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+            std::cerr << "can't complete sort" << std::endl;
         }
-        // clearDirectory(tmpDirPath);
+
     }
 
 }

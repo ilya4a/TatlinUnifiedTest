@@ -7,7 +7,6 @@
 
 #include "utils/MinHeap.h"
 #include "utils/Queue.h"
-#include "utils/ThreadPool.h"
 
 TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
     std::unique_ptr<TapeI> output,
@@ -36,18 +35,6 @@ bool TapeSorter::sort(bool rewind_tapes) {
         output_->rewind();
         input_->rewind();
     }
-
-    // output_->rewind();
-    // while (output_->read(v)) {
-    //     std::cout << v << std::endl;
-    //     output_->moveRight();
-    // }
-
-    // tempTapes_[4]->rewind();
-    // while (tempTapes_[4]->read(v)) {
-    //     std::cout << v << std::endl;
-    //     tempTapes_[4]->moveRight();
-    // }
 
     return true;
 }
