@@ -26,7 +26,6 @@ TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
 
 }
 
-
 bool TapeSorter::sort(bool rewind_tapes) {
     std::filesystem::create_directories(tmpDir_);
 

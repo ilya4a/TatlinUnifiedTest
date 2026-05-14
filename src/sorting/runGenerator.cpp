@@ -9,7 +9,6 @@
 
 namespace runGenerator {
 
-    namespace fs = std::filesystem;
 
     std::int32_t randomInt32() {
         static std::random_device rd;
@@ -29,6 +28,11 @@ namespace runGenerator {
         source->rewind();
     }
 
+    void createDefaultRandFileTape(fs::path path) {
+        std::unique_ptr<FileTape> source = std::make_unique<FileTape>(FileTapeConfig{}, path, true);
+        fillRandom(source, 1000);
+    }
+
 
     void clearDirectory(fs::path path) {
         if (fs::exists(path) && fs::is_directory(path)) {
@@ -38,35 +42,74 @@ namespace runGenerator {
         }
     }
 
-    void run(fs::path input_path, fs::path output_path) {
-        const size_t TAPE_SIZE = 1000;
+    void deleteDirectory(fs::path tmpDirPath) {
+        if (fs::exists(tmpDirPath) && fs::is_directory(tmpDirPath)) {
+            for (const auto& entry : fs::directory_iterator(tmpDirPath)) {
+                fs::remove_all(entry.path());
+            }
+            std::error_code ec;
+            fs::remove(tmpDirPath, ec);
+        }
+    }
 
-        fs::path tmpDirPath = "./tmp";
+    int printFileTape(fs::path outputPath, size_t lim) {
+
+        std::ifstream in(outputPath, std::ios::binary);
+        if (!in) {
+            std::cerr << "Cannot open output file for reading.\n";
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "Sorted output:\n";
+        int32_t val = 0;
+        int count = 0;
+        while (count < lim && in.read(reinterpret_cast<char*>(&val), sizeof(val)) ) {
+            std::cout << val;
+            ++count;
+            if (count % 10 == 0) {
+                std::cout << '\n';
+            } else {
+                std::cout << ' ';
+            }
+        }
+        if (count % 10 != 0) {
+            std::cout << '\n';
+        }
+
+        return 0;
+    }
+
+    bool run(fs::path input_path, fs::path output_path, SorterConfig sorterConfig,
+        fs::path tmpDirPath,
+        fs::path fileTapeConfPath
+        ) {
 
         std::filesystem::create_directories(tmpDirPath);
-        TapeConfig tape_config;
+        FileTapeConfig tapeConfig;
 
-        std::unique_ptr<FileTape> source = std::make_unique<FileTape>(tape_config, input_path, false);
-        std::unique_ptr<FileTape> output = std::make_unique<FileTape>(tape_config, output_path, false);
+        tapeConfig.fileTapeConfPath = fileTapeConfPath;
+
+        std::unique_ptr<FileTape> source = std::make_unique<FileTape>(tapeConfig, input_path, false);
+        std::unique_ptr<FileTape> output = std::make_unique<FileTape>(tapeConfig, output_path, true);
 
         std::atomic<size_t> t{0};
 
-        auto create_func = [&tape_config, &t]() {
-            std::filesystem::path name =  "./tmp/temp_tape" + std::to_string(t);
+        auto create_func = [tapeConfig, &t, tmpDirPath]() {
+            std::filesystem::path name = tmpDirPath / ("temp_tape" + std::to_string(t));
             t++;
-            return std::make_unique<FileTape>(tape_config, name, true);
+            return std::make_unique<FileTape>(tapeConfig, name, true);
         };
 
-        SorterConfig sorterConfig;
         sorterConfig.tapeFactory = create_func;
-        sorterConfig.memoryLimitBytes = (TAPE_SIZE * sizeof(std::int32_t))/3;
-
 
         TapeSorter tape_sorter(std::move(source), std::move(output), sorterConfig);
 
-        tape_sorter.sort();
+        bool res = tape_sorter.sort();
 
+        deleteDirectory(tmpDirPath);
+        return res;
     }
+
 
     void run_simple() {
         const size_t TAPE_SIZE = 1000;
@@ -79,7 +122,7 @@ namespace runGenerator {
 
         std::filesystem::create_directories(tmpDirPath);
 
-        TapeConfig tape_config;
+        FileTapeConfig tape_config;
 
         std::unique_ptr<FileTape> source = std::make_unique<FileTape>(tape_config, resDir/input_filename, true);
         std::unique_ptr<FileTape> output = std::make_unique<FileTape>(tape_config, resDir/output_filename, true);

@@ -16,6 +16,8 @@ add_executable(${PROJECT_NAME}
         include/utils/MinHeap.h
         include/sorting/runGenerator.h
         src/sorting/runGenerator.cpp
+        src/tape/FileTapeConfig.cpp
+        include/tape/FileTapeConfig.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include extern/CLI11/include)

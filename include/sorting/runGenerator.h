@@ -2,11 +2,20 @@
 #define TATLINUNIFIEDTEST_RUNGENERATOR_H
 #include <filesystem>
 
+#include "TapeSorter.h"
+
 
 namespace runGenerator {
+    namespace fs = std::filesystem;
 
-    void run(std::filesystem::path input, std::filesystem::path output);
+    bool run(fs::path input_path, fs::path output_path, SorterConfig sorterConfig,
+       fs::path tmpDirPath = "./tmp",
+       fs::path fileTapeConfPath = "");
+
     void run_simple();
+
+    void createDefaultRandFileTape(fs::path path);
+    int printFileTape(fs::path outputPath, size_t lim);
 }
 
 #endif // TATLINUNIFIEDTEST_RUNGENERATOR_H

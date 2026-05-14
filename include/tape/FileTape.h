@@ -6,23 +6,12 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-
-struct TapeConfig {
-    std::chrono::milliseconds readDelay{0};
-    std::chrono::milliseconds writeDelay{0};
-    std::chrono::milliseconds moveDelay{0};
-    std::chrono::milliseconds rewindDelay{0};
-
-    std::filesystem::path tmp_path;
-
-    explicit TapeConfig(std::filesystem::path const& path = "");
-    };
-
+#include "FileTapeConfig.h"
 
 class FileTape final : public TapeI {
 
 public:
-    FileTape(TapeConfig config, std::filesystem::path path, bool truncate);
+    FileTape(FileTapeConfig config, std::filesystem::path path, bool truncate);
 
     ~FileTape() override;
 
@@ -44,7 +33,7 @@ private:
     static constexpr std::size_t ElementSize = sizeof(std::int32_t);
 
     std::filesystem::path path_;
-    TapeConfig config_;
+    FileTapeConfig config_;
     std::fstream file_;
 
     std::size_t position_{0};
