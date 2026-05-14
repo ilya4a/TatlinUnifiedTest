@@ -9,7 +9,6 @@
 
 namespace runGenerator {
 
-
     std::int32_t randomInt32() {
         static std::random_device rd;
         static std::mt19937 gen(rd());
@@ -17,7 +16,7 @@ namespace runGenerator {
             std::numeric_limits<std::int32_t>::min(),
             std::numeric_limits<std::int32_t>::max()
         );
-        return dist(gen)%100;
+        return dist(gen);
     }
 
     void fillRandom(std::unique_ptr<FileTape>& source, size_t tapeSize) {
@@ -28,9 +27,9 @@ namespace runGenerator {
         source->rewind();
     }
 
-    void createDefaultRandFileTape(fs::path path) {
+    void createDefaultRandFileTape(fs::path path, size_t size) {
         std::unique_ptr<FileTape> source = std::make_unique<FileTape>(FileTapeConfig{}, path, true);
-        fillRandom(source, 1000);
+        fillRandom(source, size);
     }
 
 

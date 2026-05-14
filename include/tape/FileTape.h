@@ -28,7 +28,7 @@ public:
     std::size_t size() const override;
 
 private:
-    void sleep(std::chrono::milliseconds delay) const;
+    void sleep(std::chrono::nanoseconds delay) const;
 
     static constexpr std::size_t ElementSize = sizeof(std::int32_t);
 

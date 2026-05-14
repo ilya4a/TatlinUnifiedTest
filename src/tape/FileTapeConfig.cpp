@@ -27,16 +27,14 @@ FileTapeConfig::FileTapeConfig(std::filesystem::path const& path){
         std::string key, value;
         if (!(iss >> key >> value)) continue;
 
-        if (key == "read_delay_ms") {
-            readDelay = std::chrono::milliseconds(std::stoi(value));
-        } else if (key == "write_delay_ms") {
-            writeDelay = std::chrono::milliseconds(std::stoi(value));
-        } else if (key == "move_delay_ms") {
-            moveDelay = std::chrono::milliseconds(std::stoi(value));
-        } else if (key == "rewind_delay_ms") {
-            rewindDelay = std::chrono::milliseconds(std::stoi(value));
-        } else if (key == "tmp_dir") {
-            fileTapeConfPath = value;
+        if (key == "read_delay_ns") {
+            readDelay = std::chrono::nanoseconds(std::stoll(value));
+        } else if (key == "write_delay_ns") {
+            writeDelay = std::chrono::nanoseconds(std::stoll(value));
+        } else if (key == "move_delay_ns") {
+            moveDelay = std::chrono::nanoseconds(std::stoll(value));
+        } else if (key == "rewind_delay_ns") {
+            rewindDelay = std::chrono::nanoseconds(std::stoll(value));
         }
     }
 }

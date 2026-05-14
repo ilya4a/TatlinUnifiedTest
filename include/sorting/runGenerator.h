@@ -14,7 +14,7 @@ namespace runGenerator {
 
     void run_simple();
 
-    void createDefaultRandFileTape(fs::path path);
+    void createDefaultRandFileTape(fs::path path, size_t size);
     int printFileTape(fs::path outputPath, size_t lim);
 }
 

@@ -7,10 +7,10 @@
 #include <filesystem>
 
 struct FileTapeConfig {
-    std::chrono::milliseconds readDelay{0};
-    std::chrono::milliseconds writeDelay{0};
-    std::chrono::milliseconds moveDelay{0};
-    std::chrono::milliseconds rewindDelay{0};
+    std::chrono::nanoseconds readDelay{0};
+    std::chrono::nanoseconds writeDelay{0};
+    std::chrono::nanoseconds moveDelay{0};
+    std::chrono::nanoseconds rewindDelay{0};
 
     std::filesystem::path fileTapeConfPath;
 

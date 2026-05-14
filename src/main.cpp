@@ -7,8 +7,8 @@
 #include <iostream>
 #include <string>
 
-int app(int argc, char** argv) {
-    runGenerator::createDefaultRandFileTape("input");
+int app(int argc, char** argv, bool showTime) {
+    runGenerator::createDefaultRandFileTape("input", 1000000);
 
     CLI::App app{"External tape sorter"};
 
@@ -48,15 +48,21 @@ int app(int argc, char** argv) {
     app.add_flag("--seq", runSeq,
                  "Use sequential sorting instead of parallel");
 
-    int printResult = 0;
-    app.add_flag("-p, --print-result", printResult,
-                 "Print sorted output to console (10 values per line)");
-    const size_t print_lim = 100;
+    int printLimit = -1;
+    auto *print_opt = app.add_option("-p,--print-result", printLimit,
+                       "Print sorted output to console (default 100 values)")
+        ->expected(0, 1);
+
+    app.add_flag("-t,--time", showTime, "Print execution time");
 
     try {
         app.parse(argc, argv);
     } catch (const CLI::ParseError& e) {
         return app.exit(e);
+    }
+
+    if (print_opt->count() > 0 && printLimit == -1) {
+        printLimit = 100;
     }
 
     SorterConfig sorterConfig;
@@ -72,8 +78,8 @@ int app(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (printResult) {
-        runGenerator::printFileTape(outputPath, print_lim);
+    if (printLimit > 0) {
+        runGenerator::printFileTape(outputPath, printLimit);
     }
 
     return EXIT_SUCCESS;
@@ -81,6 +87,15 @@ int app(int argc, char** argv) {
 
 
 int main(int argc, char** argv) {
-    app(argc, argv);
-    // runGenerator::run_simple();
+    auto start = std::chrono::steady_clock::now();
+
+    bool showTime = false;
+    int res = app(argc, argv, showTime);
+
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+    if (showTime) std::cout << "Time: " << elapsed_ms << " ms\n";
+
+    return res;
 }

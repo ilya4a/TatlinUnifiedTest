@@ -126,7 +126,7 @@ void FileTape::syncToPosition() {
     file_.seekp(off, std::ios::beg);
 }
 
-void FileTape::sleep(std::chrono::milliseconds delay) const {
+void FileTape::sleep(std::chrono::nanoseconds delay) const {
     if (delay.count() > 0) {
         std::this_thread::sleep_for(delay);
     }
