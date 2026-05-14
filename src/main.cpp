@@ -7,8 +7,8 @@
 #include <iostream>
 #include <string>
 
-int app(int argc, char** argv, bool showTime) {
-    runGenerator::createDefaultRandFileTape("input", 1000000);
+int app(int argc, char** argv, bool& showTime) {
+    runGenerator::createDefaultRandFileTape("input", 10000);
 
     CLI::App app{"External tape sorter"};
 
