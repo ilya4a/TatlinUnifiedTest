@@ -8,16 +8,21 @@
 #include "tape/TapeI.h"
 #include "utils/MinHeap.h"
 
+struct SorterConfig {
+    size_t memoryLimitBytes;
+    double memoryUtilizationFactor = 0.7;
+    std::filesystem::path tmpDir = "./tmp";
+    std::function<std::unique_ptr<TapeI>(std::filesystem::path)> tapeFactory;
+    bool run_seq = false;
+};
+
 class TapeSorter {
 
-    public:
-        TapeSorter(std::unique_ptr<TapeI> input,
-            std::unique_ptr<TapeI> output,
-            std::function<std::unique_ptr<TapeI>(std::filesystem::path path)> create_tape_function,
-            size_t memoryLimitBytes,
-            double memoryUtilizationFactor = 0.7,
-            std::filesystem::path tmp_dir = "./tmp");
+    static constexpr size_t memory_divide_coef = 3;
 
+    public:
+
+        TapeSorter(std::unique_ptr<TapeI> input, std::unique_ptr<TapeI> output, SorterConfig config);
         bool sort(bool rewind_tapes = false);
         bool sortSeq(bool rewind_tapes);
 

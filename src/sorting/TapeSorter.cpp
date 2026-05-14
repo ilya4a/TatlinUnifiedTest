@@ -9,18 +9,22 @@
 #include "utils/Queue.h"
 
 TapeSorter::TapeSorter(std::unique_ptr<TapeI> input,
-    std::unique_ptr<TapeI> output,
-    std::function<std::unique_ptr<TapeI>(std::filesystem::path path)> create_tape_function,
-    size_t memoryLimitBytes,
-    double memoryUtilizationFactor,
-    std::filesystem::path tmp_dir) :
+           std::unique_ptr<TapeI> output,
+           SorterConfig config) :
 
     input_(std::move(input)),
     output_(std::move(output)),
-    create_tape(std::move(create_tape_function)),
-    memoryLimitBytes_(memoryLimitBytes),
-    maxChunkElements_(static_cast<size_t>(memoryLimitBytes * memoryUtilizationFactor / (sizeof(int32_t) * 3))),
-    tmpDir_(std::move(tmp_dir)) {}
+    create_tape(std::move(config.tapeFactory)),
+    memoryLimitBytes_(config.memoryLimitBytes),
+    tmpDir_(std::move(config.tmpDir))
+{
+    if (config.run_seq) {
+        maxChunkElements_ = static_cast<size_t>(config.memoryLimitBytes * config.memoryUtilizationFactor / sizeof(int32_t));
+    }else {
+        maxChunkElements_ = static_cast<size_t>(config.memoryLimitBytes * config.memoryUtilizationFactor / (sizeof(int32_t) * memory_divide_coef));
+    }
+
+}
 
 
 bool TapeSorter::sort(bool rewind_tapes) {
@@ -56,6 +60,8 @@ TapeSorter::~TapeSorter() {
         for (const auto& entry : std::filesystem::directory_iterator(tmpDir_)) {
             std::filesystem::remove_all(entry.path());
         }
+        std::error_code ec;
+        std::filesystem::remove(tmpDir_, ec);
     }
 }
 
@@ -232,7 +238,3 @@ void TapeSorter::runMerge() {
     }
 
 }
-
-
-
-

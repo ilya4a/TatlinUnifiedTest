@@ -11,7 +11,6 @@ namespace runGenerator {
 
     namespace fs = std::filesystem;
 
-
     std::int32_t randomInt32() {
         static std::random_device rd;
         static std::mt19937 gen(rd());
@@ -58,7 +57,12 @@ namespace runGenerator {
             return std::make_unique<FileTape>(tape_config, name, true);
         };
 
-        TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
+        SorterConfig sorterConfig;
+        sorterConfig.tapeFactory = create_func;
+        sorterConfig.memoryLimitBytes = (TAPE_SIZE * sizeof(std::int32_t))/3;
+
+
+        TapeSorter tape_sorter(std::move(source), std::move(output), sorterConfig);
 
         tape_sorter.sort();
 
@@ -89,7 +93,11 @@ namespace runGenerator {
             return std::make_unique<FileTape>(tape_config, name, true);
         };
 
-        TapeSorter tape_sorter(std::move(source), std::move(output), create_func, TAPE_SIZE*sizeof(std::int32_t)/3);
+        SorterConfig sorterConfig;
+        sorterConfig.tapeFactory = create_func;
+        sorterConfig.memoryLimitBytes = (TAPE_SIZE * sizeof(std::int32_t))/3;
+
+        TapeSorter tape_sorter(std::move(source), std::move(output), sorterConfig);
 
         if (!tape_sorter.sort()) {
             std::cerr << "can't complete sort" << std::endl;
