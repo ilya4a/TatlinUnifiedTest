@@ -33,8 +33,8 @@ bool TapeSorter::sort(bool rewind_tapes) {
     if (!createTempTapes()) return false;
 
     runMerge();
-    std::int32_t v;
 
+    std::int32_t v;
     if (rewind_tapes) {
         output_->rewind();
         input_->rewind();
@@ -56,13 +56,7 @@ bool TapeSorter::sortSeq(bool rewind_tapes) {
 
 
 TapeSorter::~TapeSorter() {
-    if (std::filesystem::exists(tmpDir_) && std::filesystem::is_directory(tmpDir_)) {
-        for (const auto& entry : std::filesystem::directory_iterator(tmpDir_)) {
-            std::filesystem::remove_all(entry.path());
-        }
-        std::error_code ec;
-        std::filesystem::remove(tmpDir_, ec);
-    }
+
 }
 
 bool TapeSorter::createTempTapes() {
@@ -125,7 +119,7 @@ bool TapeSorter::createTempTapes() {
                 if (!sortedBlocks.pop(sortedBlock)) break;
                 if (errorOccurred) break;
 
-                std::unique_ptr<TapeI> tape = create_tape(tmpDir_);
+                std::unique_ptr<TapeI> tape = create_tape();
 
                 for (size_t i = 0; i < sortedBlock.size(); i++) {
                     tape->write(sortedBlock[i]);
@@ -177,7 +171,7 @@ bool TapeSorter::createTempTapesSeq() {
 
             std::sort(chunk.begin(), chunk.end());
 
-            auto tape = create_tape(tmpDir_);
+            auto tape = create_tape();
             if (!tape) {
                 throw std::runtime_error("create_tape returned nullptr");
             }
@@ -232,7 +226,7 @@ void TapeSorter::runMerge() {
         if (tempTapes_[min_value.second]->read(new_value)) {
 
             heap.insertNode({new_value, min_value.second});
-
+            // std::cout << "new value: " <<  new_value << std::endl;
             tempTapes_[min_value.second]->moveRight();
         }
     }

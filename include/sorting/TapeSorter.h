@@ -1,6 +1,6 @@
-
 #ifndef TATLINUNIFIEDTEST_TAPESORTER_H
 #define TATLINUNIFIEDTEST_TAPESORTER_H
+
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -12,7 +12,7 @@ struct SorterConfig {
     size_t memoryLimitBytes;
     double memoryUtilizationFactor = 0.7;
     std::filesystem::path tmpDir = "./tmp";
-    std::function<std::unique_ptr<TapeI>(std::filesystem::path)> tapeFactory;
+    std::function<std::unique_ptr<TapeI>()> tapeFactory;
     bool run_seq = false;
 };
 
@@ -23,7 +23,7 @@ class TapeSorter {
     public:
 
         TapeSorter(std::unique_ptr<TapeI> input, std::unique_ptr<TapeI> output, SorterConfig config);
-        bool sort(bool rewind_tapes = false);
+        bool sort(bool rewind_tapes = true);
         bool sortSeq(bool rewind_tapes);
 
         ~TapeSorter();
@@ -35,13 +35,11 @@ class TapeSorter {
         size_t memoryLimitBytes_ {0};
         size_t maxChunkElements_ {0};
 
-        std::function<std::unique_ptr<TapeI>(std::filesystem::path path)> create_tape;
+        std::function<std::unique_ptr<TapeI>()> create_tape;
 
         std::vector<std::unique_ptr<TapeI>> tempTapes_;
 
         std::filesystem::path tmpDir_;
-
-
 
         bool createTempTapes();
         bool createTempTapesSeq();

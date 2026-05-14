@@ -14,10 +14,10 @@
 class TapeSorterTest : public ::testing::Test {
 protected:
 
-    std::function<std::unique_ptr<TapeI>(std::filesystem::path)> factory_;
+    std::function<std::unique_ptr<TapeI>()> factory_;
 
     void SetUp() override {
-        factory_ = [](std::filesystem::path) {
+        factory_ = []() {
             return std::make_unique<MockTape>();
         };
     }
@@ -31,8 +31,11 @@ protected:
 
         auto* outputRaw = output.get();
 
-        TapeSorter sorter(std::move(input), std::move(output), factory_,
-                          memoryLimitBytes, memoryUtilizationFactor, "./tmp");
+        SorterConfig sorterConfig;
+        sorterConfig.tapeFactory = factory_;
+        sorterConfig.memoryLimitBytes = memoryLimitBytes;
+
+        TapeSorter sorter(std::move(input), std::move(output), sorterConfig);
 
         ASSERT_TRUE(sorter.sort(rewind));
 

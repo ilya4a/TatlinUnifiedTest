@@ -51,8 +51,8 @@ namespace runGenerator {
 
         std::atomic<size_t> t{0};
 
-        auto create_func = [&tape_config, &t](std::filesystem::path path) {
-            std::filesystem::path name = path / std::string( "temp_tape" + std::to_string(t));
+        auto create_func = [&tape_config, &t]() {
+            std::filesystem::path name =  "./tmp/temp_tape" + std::to_string(t);
             t++;
             return std::make_unique<FileTape>(tape_config, name, true);
         };
@@ -76,6 +76,7 @@ namespace runGenerator {
         fs::path input_filename = "input";
         fs::path output_filename = "output";
         std::filesystem::create_directories(resDir);
+
         std::filesystem::create_directories(tmpDirPath);
 
         TapeConfig tape_config;
@@ -87,8 +88,8 @@ namespace runGenerator {
 
         std::atomic<size_t> t{0};
 
-        auto create_func = [&tape_config, &t](std::filesystem::path path) {
-            std::filesystem::path name = path / std::string( "temp_tape" + std::to_string(t));
+        auto create_func = [&tape_config, &t]() {
+            std::filesystem::path name = "./tmp/temp_tape" + std::to_string(t);
             t++;
             return std::make_unique<FileTape>(tape_config, name, true);
         };
@@ -103,6 +104,12 @@ namespace runGenerator {
             std::cerr << "can't complete sort" << std::endl;
         }
 
+        if (std::filesystem::exists(tmpDirPath) && std::filesystem::is_directory(tmpDirPath)) {
+            for (const auto& entry : std::filesystem::directory_iterator(tmpDirPath)) {
+                std::filesystem::remove_all(entry.path());
+            }
+            std::error_code ec;
+            std::filesystem::remove(tmpDirPath, ec);
+        }
     }
-
 }
